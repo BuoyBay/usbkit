@@ -1,0 +1,133 @@
+#If TargetLinux Then
+Import USBKitLinuxBackend
+#ElseIf TargetWindows Then
+Import USBKitWindowsBackend
+#End If
+Public Class USBDeviceInfo
+    Private Property mId As String
+    Public Property Id As String
+        Get
+            Return mId
+        End Get
+    End Property
+    Private Property mVendorId As Optional Of Integer
+    Public Property VendorId As Optional Of Integer
+        Get
+            Return mVendorId
+        End Get
+    End Property
+    Private Property mProductId As Optional Of Integer
+    Public Property ProductId As Optional Of Integer
+        Get
+            Return mProductId
+        End Get
+    End Property
+    Private Property mBusNumber As Optional Of Integer
+    Public Property BusNumber As Optional Of Integer
+        Get
+            Return mBusNumber
+        End Get
+    End Property
+    Private Property mDeviceNumber As Optional Of Integer
+    Public Property DeviceNumber As Optional Of Integer
+        Get
+            Return mDeviceNumber
+        End Get
+    End Property
+    Private Property mName As Optional Of String
+    Public Property Name As Optional Of String
+        Get
+            Return mName
+        End Get
+    End Property
+    Private Property mManufacturer As Optional Of String
+    Public Property Manufacturer As Optional Of String
+        Get
+            Return mManufacturer
+        End Get
+    End Property
+    Private Property mProduct As Optional Of String
+    Public Property Product As Optional Of String
+        Get
+            Return mProduct
+        End Get
+    End Property
+    Private Property mSerialNumber As Optional Of String
+    Public Property SerialNumber As Optional Of String
+        Get
+            Return mSerialNumber
+        End Get
+    End Property
+    Public Sub Constructor(vId As String, vVendorId As Optional Of Integer, vProductId As Optional Of Integer, vBusNumber As Optional Of Integer, vDeviceNumber As Optional Of Integer, vName As Optional Of String, vManufacturer As Optional Of String, vProduct As Optional Of String, vSerialNumber As Optional Of String)
+        mId = vId
+        mVendorId = vVendorId
+        mProductId = vProductId
+        mBusNumber = vBusNumber
+        mDeviceNumber = vDeviceNumber
+        mName = vName
+        mManufacturer = vManufacturer
+        mProduct = vProduct
+        mSerialNumber = vSerialNumber
+    End Sub
+End Class
+''' Read-only compile-target backend test; no runtime I/O.
+Public Function USBDiscoverySupported() As Boolean
+#If TargetLinux Then
+    Return True
+#ElseIf TargetWindows Then
+    Return True
+#Else
+    Return False
+#End If
+End Function
+
+
+Private Function USBKitParseId(id As String, marker As String) As Optional Of Integer
+    Dim upper As String = String.UCase(id)
+    Dim position As Integer = String.InStr(upper, marker)
+    If position = 0 Then
+        Return None
+    End If
+    Dim value As String = String.Mid(upper, position + String.Len(marker), 4)
+    If String.Len(value) <> 4 Then
+        Return None
+    End If
+    Dim number As Integer = 0
+    For i As Integer = 1 To 4
+        Dim code As Integer = String.Asc(value, i)
+        Dim digit As Integer = code - 48
+        If code >= 65 And code <= 70 Then
+            digit = code - 55
+        ElseIf code < 48 Or code > 57 Then
+            Return None
+        End If
+        number = number * 16 + digit
+    Next
+    Return Some(number)
+End Function
+''' Read-only: Linux opens/closes the USB sysfs directory; Windows probes libraries only.
+Public Function USBDiscoveryAvailable() As Boolean
+#If TargetLinux Then
+    Return USBKitLinuxProbe()
+#ElseIf TargetWindows Then
+    Return USBKitWindowsIsAvailable()
+#Else
+    Return False
+#End If
+End Function
+''' Read-only snapshot; errors throw, successful absence returns an empty array. IDs are native observations.
+Public Function USBDevices() As Array Of USBDeviceInfo
+    Dim results As Array Of USBDeviceInfo = []
+#If TargetLinux Then
+    For Each item In USBKitLinuxDevices()
+        Array.Append(results, New USBDeviceInfo(item.SysfsName, Some(item.VendorId), Some(item.ProductId), Some(item.BusNumber), Some(item.DeviceNumber), item.Product, item.Manufacturer, item.Product, item.SerialNumber))
+    Next
+#ElseIf TargetWindows Then
+    For Each item In USBKitWindowsPresentDevices()
+        Array.Append(results, New USBDeviceInfo(item.InstanceId, USBKitParseId(item.InstanceId, "VID_"), USBKitParseId(item.InstanceId, "PID_"), None, None, item.Name, item.Manufacturer, None, None))
+    Next
+#Else
+    Throw New UnsupportedOperationException("USB discovery is unsupported on this target")
+#End If
+    Return results
+End Function
