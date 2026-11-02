@@ -8,8 +8,7 @@ Enumeration is read-only. Empty arrays mean successful enumeration with no resul
 
 Adapter mapping: linuxusb.Devices / WinUSB.PresentDevices → USBDevices; UsbDevice / USBDevice → USBDeviceInfo. Linux sysfs name and Windows PnP instance ID map to Id. Linux IDs/topology become Some; Windows VID/PID parse from the PnP instance ID when present, while bus/device numbers remain None. Linux Product supplies Name; Windows product/serial remain None. Legacy entry modules are unchanged; no forwarding adapter is installed by this change.
 
-Builder registration: name `usbkit`, source `libraries/usbkit`, version `0.1.0`, output `usbkit-0.1.0.buipkg`. All six desktop triples are in the manifest so unsupported-target predicates can be imported; this does not claim an implemented backend on each target. Registered in the unified builder: `python3 tools/build_integrations.py usbkit --all-targets` (or `--native --all-targets` for the full native set).
+Builder registration: name `usbkit`, source `libraries/usbkit`, version `0.1.0`, output `usbkit-0.1.0.buipkg`. All six desktop triples are in the manifest so unsupported-target predicates can be imported; this does not claim an implemented backend on each target. Build with the native package builder described in
+[CONTRIBUTING](https://github.com/BuoyBay/usbkit/blob/main/CONTRIBUTING.md).
 
-Maintainers run the private validation suite before release. See the repository README for public build instructions.
-
-Native evidence distinguishes hardware snapshots, successful zero-hardware enumeration, absent services and synthetic fixtures. Linux USB fixtures use package-local injectable sysfs roots; BlueZ fixtures parse recorded replies including successful empty and absent optional properties. A private D-Bus session with no BlueZ verifies service absence is an error. Real attached USB/Bluetooth diversity remains limited. ARM64 and macOS checks are not native execution claims.
+Supported operations can fail when hardware, services or access are absent; callers must handle those errors. Cross-target compiler checks do not establish native backend behavior.
