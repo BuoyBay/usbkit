@@ -1,4 +1,4 @@
-# Discover USB devices through native OS APIs
+# USB devices via native OS APIs
 
 Import `usbkit` (or `usbkit.USBKit`). This focused package owns `USBDiscoverySupported()`, `USBDiscoveryAvailable()` and `USBDevices() As Array Of USBDeviceInfo`. It has no package, container, or external source dependency. Backend modules are implementation details and are non-public imports; their module-scope symbols are globally prefixed to avoid collisions.
 
