@@ -2,7 +2,7 @@
     "schema": 1,
     "name": "usbkit",
     "version": "0.1.0",
-    "description": "USB devices via native OS APIs",
+    "description": "List USB devices",
     "platforms": [
         "arm64-apple-macos",
         "x86_64-apple-macos",
