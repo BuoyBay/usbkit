@@ -2,7 +2,7 @@
   "schema": 1,
   "name": "usbkit",
   "version": "0.1.0",
-  "description": "Focused read-only native usbkit discovery",
+  "description": "Discover USB devices through native OS APIs",
   "platforms": [
     "arm64-apple-macos",
     "x86_64-apple-macos",
